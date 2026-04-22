@@ -1,52 +1,35 @@
 #!/bin/bash
 
-# # # # # # # # # # # # # # # # # # # # # # 
-#
-# About: This Script is for list the members who has read access
-#
-# Owner: Rohan Irkullawar
-#
-# Date: 04/2026
-#
-# # # # # # # # # # # # # # # # # # # # # #
+# -------------------------------
+# Author: Rohan Irkullawar
+# Purpose: List users with READ access
+# -------------------------------
 
-# GitHub API URL
 API_URL="https://api.github.com"
 
-# GitHub username and personal access token
 USERNAME=$username
 TOKEN=$token
 
-# User and Repository information
 REPO_OWNER=$1
 REPO_NAME=$2
 
-# Function to make a GET request to the GitHub API
-function github_api_get {
-    local endpoint="$1"
-    local url="${API_URL}/${endpoint}"
+list_users_with_read() {
 
-    # Send a GET request to the GitHub API with authentication
-    curl -s -u "${USERNAME}:${TOKEN}" "$url"
-}
+    # Step 1: Create endpoint
+    endpoint="repos/${REPO_OWNER}/${REPO_NAME}/collaborators"
 
-# Function to list users with read access to the repository
-function list_users_with_read_access {
-    local endpoint="repos/${REPO_OWNER}/${REPO_NAME}/collaborators"
+    # Step 2: Create full URL
+    url="${API_URL}/${endpoint}"
 
-    # Fetch the list of collaborators on the repository
-    collaborators="$(github_api_get "$endpoint" | jq -r '.[] | select(.permissions.pull == true) | .login')"
+    # Step 3: Call API and filter users
+    users=$(curl -s -u "${USERNAME}:${TOKEN}" "$url" \
+        | jq -r '.[] | select(.permissions.pull==true) | .login')
 
-    # Display the list of collaborators with read access
-    if [[ -z "$collaborators" ]]; then
-        echo "No users with read access found for ${REPO_OWNER}/${REPO_NAME}."
+    # Step 4: Print result
+    if [ -z "$users" ]; then
+        echo "No users with read access in ${REPO_OWNER}/${REPO_NAME}"
     else
-        echo "Users with read access to ${REPO_OWNER}/${REPO_NAME}:"
-        echo "$collaborators"
+        echo "Users with read access:"
+        echo "$users"
     fi
 }
-
-# Main script
-
-echo "Listing users with read access to ${REPO_OWNER}/${REPO_NAME}..."
-list_users_with_read_access
