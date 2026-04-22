@@ -5,6 +5,8 @@
 # Purpose: List users with READ access
 # -------------------------------
 
+helper()
+
 API_URL="https://api.github.com"
 
 USERNAME=$username
@@ -33,3 +35,10 @@ list_users_with_read() {
         echo "$users"
     fi
 }
+
+helper() {
+  expected_cmd_args=2
+  if [ $# -ne $expected_cmd_args ]; then
+  echo "Pass the required arguments/parameters"
+  fi
+  }
